@@ -14,6 +14,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import ConnectionDb from "./db/db.connection.js";
 import student from "./router/router.js";
+
 const port = process.env.port || "3000";
 
 const app = express();

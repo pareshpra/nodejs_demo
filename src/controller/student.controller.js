@@ -52,36 +52,49 @@ const AddNewUser = async (req, res) => {
 
 const getAllUser = async (req, res) => {
   try {
-    const {search} = req?.query;
 
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const { search } = req?.query;
+    const page = Number(req?.query?.page) || 1;
+    const limit = Number(req?.query?.limit) || 10;
     const pageNumber = page ? parseInt(page, 10) : undefined;
-    const skip = pageNumber ? (pageNumber - 1) * limit : undefined;
+    const skip = pageNumber ? (pageNumber - 1) * limit : undefined;  /// skip the previous data
 
-    const allUser = await UserModal.find().sort({ createdAt:-1}).skip(skip).limit(limit);
-    if(search){
-      const result = allUser.filter((item)=> item.firstName.toLowerCase() === search);
-      
-      if(result){
-        return res.status(200).json({
-          status: true,
-          message:"User get successfully",
-          data: result
-        })
-      }else{
-        return res.status(400).json({
-          status: true,
-          message:" user not found",
-          data:null
-        })
-      }
-    }else{
+    let allUser;
+    if (search) {
+      const searchRegex = new RegExp(search, 'i'); // 'i' flag for case-insensitive search
+      // allUser = await UserModal.find({
+      //   "$or":[
+      //     {
+      //       "firstName":{searchRegex: search}
+      //     }
+      //   ]
+      // }) 
+      // console.log("search all user", allUser);
+      allUser = await UserModal.find({ firstName: searchRegex }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    } else {
+      allUser = await UserModal.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
+    }
+
+    const totalRecords = await UserModal.countDocuments();
+    const hasMorePages = pageNumber ? pageNumber * limit < totalRecords : false;
+    const recordsPerPage = allUser.length;
+    const totalUsers = allUser.length;
+
+    if (allUser.length > 0) {
       return res.status(200).json({
         success: true,
-        message: "User get successfully",
+        message: "User found successfully",
         data: allUser,
-
+        totalUsers,
+        currentPage: pageNumber || 1,
+        hasMorePages,
+        recordsPerPage
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "No user found matching the search criteria",
+        data: null,
       });
     }
   } catch (error) {
