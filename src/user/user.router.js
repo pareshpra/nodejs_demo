@@ -7,7 +7,7 @@ import {
   getUserById,
   loginUser,
   updateUser
-} from "../controller/student.controller.js";
+} from "./user.controller.js";
 const router = express.Router();
 
 // router.get("/", getAllStudent);

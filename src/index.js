@@ -13,9 +13,10 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import ConnectionDb from "./db/db.connection.js";
-import student from "./router/router.js";
+import student from "./user/user.router.js";
+import product from "./product/product.route.js";
 
-const port = process.env.port || "3000";
+const port = process.env.port || "8000";
 
 const app = express();
 
@@ -27,7 +28,9 @@ app.use(
 );
 
 ConnectionDb();
+
 app.use("/user", student);
+app.use("/product", product);
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);

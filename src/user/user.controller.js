@@ -1,5 +1,5 @@
 // const UserModal = require("../modal/user.modal");
-import UserModal from "../modal/user.modal.js";
+import UserModal from "./user.model.js";
 import bcrypt from "bcrypt";
 import generateToken from "../utils/generate.token.js";
 
@@ -61,20 +61,16 @@ const getAllUser = async (req, res) => {
 
     let allUser;
     if (search) {
-      const searchRegex = new RegExp(search, 'i'); // 'i' flag for case-insensitive search
-      // allUser = await UserModal.find({
-      //   "$or":[
-      //     {
-      //       "firstName":{searchRegex: search}
-      //     }
-      //   ]
-      // }) 
-      // console.log("search all user", allUser);
-      allUser = await UserModal.find({ firstName: searchRegex }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+      // const searchRegex = new RegExp(search, 'i'); // 'i' flag for case-insensitive search
+      allUser = await UserModal.find({
+        "$or": [
+          { "firstName": { $regex: search, $options: 'i' } },
+        ]
+      });
+      // allUser = await UserModal.find({ firstName: searchRegex }).sort({ createdAt: -1 }).skip(skip).limit(limit);
     } else {
       allUser = await UserModal.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
     }
-
     const totalRecords = await UserModal.countDocuments();
     const hasMorePages = pageNumber ? pageNumber * limit < totalRecords : false;
     const recordsPerPage = allUser.length;
@@ -98,6 +94,7 @@ const getAllUser = async (req, res) => {
       });
     }
   } catch (error) {
+    console.log('err-->', error.message)
     return res.json(500).json({
       success: false,
       message: error.message,
@@ -168,9 +165,7 @@ const loginUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    
     const {id} = req.params;
-    
     const user = await UserModal.findById(id);
     
     if(!user){

@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import UserToken from "../modal/userToken.modal.js"
+import UserToken from "../user/userToken.modal.js"
 
 
 const generateToken = async (EmailId, userId) => {
